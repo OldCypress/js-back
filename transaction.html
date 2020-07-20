@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="assets/css/style.css"/>
+        <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+        <link href="assets/css/codemirror.css" rel="stylesheet">
+        <link rel="stylesheet" href="assets/font/css/font-awesome.min.css" />
+        <!--[if lte IE 8]>
+		  <link rel="stylesheet" href="assets/css/ace-ie.min.css" />
+		<![endif]-->
+		<!--[if IE 7]>
+		  <link rel="stylesheet" href="assets/css/font-awesome-ie7.min.css" />
+		<![endif]-->
+        <!--[if lte IE 8]>
+		  <link rel="stylesheet" href="assets/css/ace-ie.min.css" />
+		<![endif]-->
+		<script src="assets/js/ace-extra.min.js"></script>
+		<!--[if lt IE 9]>
+		<script src="assets/js/html5shiv.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+		<![endif]-->
+        		<!--[if !IE]> -->
+		<script src="assets/js/jquery-1.9.1.min.js" type="text/javascript"></script>
+		<!-- <![endif]-->
+        <script src="assets/dist/echarts.js"></script>
+        <script src="assets/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="assets/js/validation.js"></script>
+     <script type="">
+        $.ajax({
+         url: url+"/admin/isLogin",
+         type: "GET",
+         dataType: "json",
+         async:false,
+         xhrFields: {withCredentials: true},
+        success:function (data) {
+            //  console.log(data.code)
+            // console.log(url+"../login.html")
+            if(data.code=="-1"){
+                window.location.href=url+"/admin/login.html"
+            }
+
+        }
+    })
+    </script>
+<title>交易</title>
+</head>
+
+<body>
+<div class=" page-content clearfix">
+ <div class="transaction_style">
+   <ul class="state-overview clearfix">
+    <li class="Info">
+     <span class="symbol red"><i class="fa fa-jpy"></i></span>
+     <span class="value"><h4 >交易金额</h4><p class="Quantity color_red" id="amount">34565.68</p></span>
+    </li>
+     <li class="Info">
+     <span class="symbol  blue"><i class="fa fa-shopping-cart"></i></span>
+     <span class="value"><h4 >订单数量</h4><p class="Quantity color_red" id="ordersum">5656</p></span>
+    </li>
+     <li class="Info">
+     <span class="symbol terques"><i class="fa fa-shopping-cart"></i></span>
+     <span class="value"><h4 >交易成功</h4><p class="Quantity color_red" id="success">34565</p></span>
+    </li>
+     <li class="Info">
+     <span class="symbol yellow"><i class="fa fa-shopping-cart"></i></span>
+     <span class="value"><h4 >交易失败</h4><p class="Quantity color_red" id="fail">34</p></span>
+    </li>
+
+   </ul>
+ 
+ </div>
+ <div class="t_Record">
+               <div id="main" style="height:400px; overflow:hidden; width:100%; overflow:auto" ></div>     
+              </div> 
+</div>
+</body>
+</html>
+<script type="text/javascript">
+     $(document).ready(function(){
+		 
+		  $(".t_Record").width($(window).width()-60);
+		  //当文档窗口发生改变时 触发  
+    $(window).resize(function(){
+		 $(".t_Record").width($(window).width()-60);
+		});
+ });
+
+</script>
+<script>
+    $(document).ready(function() {
+    $.ajax({
+        url: url+"/order/statistical/global",
+        type: "GET",
+        dataType: "json",
+        async:true,
+        xhrFields: {withCredentials: true},
+        success:function (msg) {
+            //console.log(msg)
+
+            var amount=msg.data.orderPaidAmount;
+            var ordersum=msg.data.orderTotal;
+            var success=msg.data.orderPaid;
+            var fail=msg.data.orderCancel;
+
+            document.getElementById("amount").innerHTML= amount;
+            document.getElementById("ordersum").innerHTML= ordersum;
+            document.getElementById("success").innerHTML= success;
+            document.getElementById("fail").innerHTML= fail;
+
+
+        }
+    })
+})
+
+    $(document).ready(function() {
+    $.ajax({
+        url: url+"/order/statistical",
+        type: "GET",
+        dataType: "json",
+        async:false,
+        data:{
+            month:true,
+            beginDate:201901,
+            endDate:201912
+        },
+        xhrFields: {withCredentials: true},
+        success:function (msg) {
+            console.log(msg)
+            //所有订单中最大值和最小值
+            var orderTotalMax = 0,orderTotalMaxI=0, orderTotalMin=10000000000,orderTotalMinI=0;
+            for(var i=0;i<12;i++){
+                if(msg.data[i].orderTotal>orderTotalMax){orderTotalMax=msg.data[i].orderTotal;orderTotalMaxI=i;}
+                if(msg.data[i].orderTotal<orderTotalMin){orderTotalMin=msg.data[i].orderTotal;orderTotalMinI=i;}
+            }
+
+            //代付款中对最大值和最小值
+            var orderWaitPayMax = 0, orderWaitPayMaxI = 0,orderWaitPayMin=10000000000,orderWaitPayMinI = 0;
+            for(var i=0;i<12;i++){
+                if(msg.data[i].orderWaitPay>orderWaitPayMax){orderWaitPayMax=msg.data[i].orderWaitPay;orderWaitPayMaxI=i;}
+                if(msg.data[i].orderWaitPay<orderWaitPayMin){orderWaitPayMin=msg.data[i].orderWaitPay;orderWaitPayMinI=i;}
+            }
+
+            //已付款中的最大值和最小值
+            var orderDoneMax = 0, orderDoneMaxI = 0,orderDoneMin=10000000000,orderDoneMinI = 0;
+            for(var i=0;i<12;i++){
+                if(msg.data[i].orderDone>orderDoneMax){orderDoneMax=msg.data[i].orderDone;orderDoneMaxI=i;}
+                if(msg.data[i].orderDone<orderDoneMin){orderDoneMin=msg.data[i].orderDone;orderDoneMinI=i;}
+            }
+
+            //取消订单中的最大值和最小值
+            var orderCancelMax = 0, orderCancelMaxI = 0,orderCancelMin=10000000000, orderCancelMinI = 0;
+            for(var i=0;i<12;i++){
+                if(msg.data[i].orderCancel>orderCancelMax){orderCancelMax=msg.data[i].orderCancel;orderCancelMaxI=i;}
+                if(msg.data[i].orderCancel<orderCancelMin){orderCancelMin=msg.data[i].orderCancel;orderCancelMinI=i;}
+            }
+
+
+
+
+            require.config({
+            paths: {
+                echarts: './assets/dist'
+            }
+        });
+            require(
+            [
+                'echarts',
+				'echarts/theme/macarons',
+                'echarts/chart/line',   // 按需加载所需图表，如需动态类型切换功能，别忘了同时加载相应图表
+                'echarts/chart/bar'
+            ],
+            function (ec,theme) {
+                var myChart = ec.init(document.getElementById('main'),theme);
+               option = {
+    title : {
+        text: '月购买订单交易记录',
+        subtext: '实时获取用户订单购买记录'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['所有订单','待付款','已付款','取消订单']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            data : ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value'
+        }
+    ],
+    series : [
+        {
+            name:'所有订单',
+            type:'bar',
+            data:[msg.data[0].orderTotal,msg.data[1].orderTotal,msg.data[2].orderTotal,msg.data[3].orderTotal, msg.data[4].orderTotal, msg.data[5].orderTotal, msg.data[6].orderTotal, msg.data[7].orderTotal, msg.data[8].orderTotal, msg.data[9].orderTotal, msg.data[10].orderTotal, msg.data[11].orderTotal],
+            markPoint : {
+                data : [
+                    {type : 'max', name: '最大值'},
+                    {type : 'min', name: '最小值'}
+                ]
+            }
+        },
+        {
+            name:'待付款',
+            type:'bar',
+            data:[msg.data[0].orderWaitPay, msg.data[1].orderWaitPay, msg.data[2].orderWaitPay, msg.data[3].orderWaitPay, msg.data[4].orderWaitPay, msg.data[5].orderWaitPay, msg.data[6].orderWaitPay, msg.data[7].orderWaitPay, msg.data[8].orderWaitPay, msg.data[9].orderWaitPay, msg.data[10].orderWaitPay, msg.data[11].orderWaitPay],
+            markPoint : {
+                data : [
+                    {name : '年最高', value : orderWaitPayMax, xAxis: orderWaitPayMaxI, yAxis: orderWaitPayMax, symbolSize:18},
+                    {name : '年最低', value : orderWaitPayMax, xAxis: orderWaitPayMinI, yAxis: 0}
+                ]
+            },
+
+
+        }
+		, {
+            name:'已付款',
+            type:'bar',
+            data:[msg.data[0].orderDone, msg.data[1].orderDone, msg.data[2].orderDone, msg.data[3].orderDone, msg.data[4].orderDone, msg.data[5].orderDone, msg.data[6].orderDone, msg.data[7].orderDone, msg.data[8].orderDone, msg.data[9].orderDone, msg.data[10].orderDone, msg.data[11].orderDone],
+            markPoint : {
+                data : [
+                    {name : '年最高', value : orderDoneMax, xAxis: orderDoneMaxI, yAxis: orderDoneMax, symbolSize:18},
+                    {name : '年最低', value : orderDoneMin, xAxis: orderDoneMinI, yAxis: 0}
+                ]
+            },
+
+		}
+		, {
+            name:'取消订单',
+            type:'bar',
+            data:[msg.data[0].orderCancel, msg.data[1].orderCancel, msg.data[2].orderCancel, msg.data[3].orderCancel, msg.data[4].orderCancel, msg.data[5].orderCancel, msg.data[6].orderCancel, msg.data[7].orderCancel, msg.data[8].orderCancel, msg.data[9].orderCancel, msg.data[10].orderCancel, msg.data[11].orderCancel],
+            markPoint : {
+                data : [
+                    {name : '年最高', value : orderCancelMax, xAxis: orderCancelMaxI, yAxis: orderCancelMax, symbolSize:18},
+                    {name : '年最低', value : orderCancelMin, xAxis: orderCancelMinI, yAxis: 0}
+                ]
+            },
+
+		}
+    ],
+};
+
+                myChart.setOption(option);
+            }
+        );
+        }
+    })
+})
+</script>

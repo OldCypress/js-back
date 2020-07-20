@@ -1,0 +1,195 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+		<meta charset="utf-8">
+		<link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+		<!--[if IE 7]>
+		  <link rel="stylesheet" href="assets/css/font-awesome-ie7.min.css" />
+		<![endif]-->
+		<link rel="stylesheet" href="assets/css/ace.min.css" />
+		<link rel="stylesheet" href="assets/css/ace-rtl.min.css" />
+		<link rel="stylesheet" href="assets/css/ace-skins.min.css" />
+        <link rel="stylesheet" href="assets/css/style.css"/>
+		<!--[if lte IE 8]>
+		  <link rel="stylesheet" href="assets/css/ace-ie.min.css" />
+		<![endif]-->
+		<script src="assets/js/ace-extra.min.js"></script>
+		<!--[if lt IE 9]>
+		<script src="assets/js/html5shiv.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+		<![endif]-->
+		<script src="assets/js/jquery-1.9.1.min.js"></script>
+        <script src="assets/layer/layer.js" type="text/javascript"></script>
+    <script type="text/javascript" src="assets/js/validation.js"></script>
+		<style>
+            .imageDiv {
+            display:inline-block;
+            width:160px;
+            height:130px;
+            -webkit-box-sizing:border-box;
+            -moz-box-sizing:border-box;
+            box-sizing:border-box;
+            border:1px dashed darkgray;
+            background:#f8f8f8;
+            position:relative;
+            overflow:hidden;
+            margin:10px
+        }
+        .cover {
+            position:absolute;
+            z-index:1;
+            top:0;
+            left:0;
+            width:160px;
+            height:130px;
+            background-color:rgba(0,0,0,.3);
+            display:none;
+            line-height:125px;
+            text-align:center;
+            cursor:pointer;
+        }
+        .cover .delbtn {
+            color:red;
+            font-size:20px;
+        }
+        .imageDiv:hover .cover {
+            display:block;
+        }
+        .addImages {
+            display:inline-block;
+            width:160px;
+            height:130px;
+            -webkit-box-sizing:border-box;
+            -moz-box-sizing:border-box;
+            box-sizing:border-box;
+            border:1px dashed darkgray;
+            background:#f8f8f8;
+            position:relative;
+            overflow:hidden;
+            margin:10px;
+        }
+        .text-detail {
+            margin-top:40px;
+            text-align:center;
+        }
+        .text-detail span {
+            font-size:40px;
+        }
+        .file {
+            position:absolute;
+            top:0;
+            left:0;
+            width:160px;
+            height:130px;
+            opacity:0;
+        }
+
+        </style>
+<title>轮播图片</title>
+</head>
+<body>
+<div class="type_style">
+	<div class="type_title">轮播图片</div>
+	<div class="type_content">
+		<p style="font-size: 20px;font-weight: bold;">请上传多张照片 </p>
+        <p><span style="color: red">注：每张照片大写不可超过4M，且最多可以传十张</span></p>
+        <div class="picDiv">
+        <div class="addImages">
+
+            <input type="file" class="file" id="uploadFilexxx" multiple="multiple" accept="image/png, image/jpeg, image/gif, image/jpg">
+            <div class="text-detail">
+                <span>+</span>
+                <p>点击上传</p>
+            </div>
+        </div>
+        <button type="button" id="bbt">上传</button>
+    </div>
+	</div>
+    <div class="msg" style="display: none;"></div>
+
+</div>
+
+
+<script>
+    //图片上传预览功能
+    var userAgent = navigator.userAgent; //用于判断浏览器类型
+    //使用formData完成多图片上传
+    var formData = new FormData();
+    $(".file").change(function() {
+        //获取选择图片的对象
+        var docObj = $(this)[0];
+        var picDiv = $(this).parents(".picDiv");
+        //得到所有的图片文件
+        var fileList = docObj.files;
+        //将图片数据放到formData中传递后台
+        if($(this)[0].files.length==1){
+            formData.append("file",docObj.files[0]);
+            console.log("一次拉进来了一张图片");
+        }else{
+            for(var i=0; i<$(this)[0].files.length;i++){
+                formData.append("file",$(this)[0].files[i]);
+                console.log("你这一次拉进来好几张图片呢");
+            }
+        }
+        //循环遍历
+        for (var i = 0; i < fileList.length; i++) {
+            //动态添加html元素
+            var picHtml = "<div class='imageDiv' > <img id='img" + fileList[i].name + "' /> <div class='cover'><i class='delbtn'>删除</i></div></div>";
+            console.log(picHtml);
+            picDiv.prepend(picHtml);
+            //获取图片imgi的对象
+            var imgObjPreview = document.getElementById("img" + fileList[i].name);
+            if (fileList && fileList[i]) {
+                //图片属性
+                imgObjPreview.style.display = 'block';
+                imgObjPreview.style.width = '160px';
+                imgObjPreview.style.height = '130px';
+                //imgObjPreview.src = docObj.files[0].getAsDataURL();
+                //火狐7以上版本不能用上面的getAsDataURL()方式获取，需要以下方式
+                if (userAgent.indexOf('MSIE') == -1) {
+                    //IE以外浏览器
+                    imgObjPreview.src = window.URL.createObjectURL(docObj.files[i]); //获取上传图片文件的物理路径;
+                    console.log(imgObjPreview.src);
+                    // var msgHtml = '<input type="file" id="fileInput" multiple/>';
+                } else {
+                    //IE浏览器
+                    if (docObj.value.indexOf(",") != -1) {
+                        var srcArr = docObj.value.split(",");
+                        imgObjPreview.src = srcArr[i];
+                    } else {
+                        imgObjPreview.src = docObj.value;
+                    }
+                }
+            }
+        }
+        /*删除功能*/
+        $(".delbtn").click(function() {
+            var _this = $(this);
+            _this.parents(".imageDiv").remove();
+        });
+    });
+    $("#bbt").click(function(){
+        $.ajax({
+            type:'post',
+            dataType:'json',
+            data:formData,
+            cache: false, //上传文件不需要缓存
+            url:url+"/admin/addShowImage",
+            processData: false, // 告诉jQuery不要去处理发送的数据
+            contentType: false, // 告诉jQuery不要去设置Content-Type请求头
+            success:function(data){
+                //console.log(data)
+                alert("添加成功")
+            },
+            error:function (data) {
+                alert("添加失败")
+            }
+        })
+    })
+</script>
+
+
+
+</body>
+</html>

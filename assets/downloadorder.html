@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<!--[if lt IE 9]>
+<script type="text/javascript" src="assets/js/html5.js"></script>
+<script type="text/javascript" src="assets/js/respond.min.js"></script>
+<script type="text/javascript" src="assets/js/PIE_IE678.js"></script>
+<![endif]-->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css"/>
+<link href="assets/css/codemirror.css" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/ace.min.css" />
+      <link rel="stylesheet" href="assets/Widget/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+<link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+<!--[if IE 7]>
+		  <link rel="stylesheet" href="assets/css/font-awesome-ie7.min.css" />
+		<![endif]-->
+<link href="assets/Widget/icheck/icheck.css" rel="stylesheet" type="text/css" />
+
+<script src="assets/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="assets/js/validation.js"></script>
+
+<title>订单打印</title>
+</head>
+<body>
+<div class="page_right_style">
+   <div class="type_title">订单打印</div>
+	<form   action="" method="post" class="form form-horizontal" id="form-article-add" onsubmit="return false">
+		<div class=" clearfix cl">
+			<div class="Add_p_s">
+            <label class="form-label col-2">时间：</label>
+			<div class="formControls col-2"><input type="text" style="width: 150px" class="input-text" value="" placeholder="格式“yyyy-MM-dd”" id="time" name="beginDate"></div>
+            </div>
+
+
+
+			<div class="Add_p_s">
+             <label class="form-label col-2">校区：</label>
+			 <div class="formControls col-2"><select name="campusId" class="form-control" id="form_select_1">
+																<option value="">--选择校区--</option>
+
+
+															</select></div>
+			</div>
+            <div class="Add_p_s">
+             <label class="form-label col-2">学院：</label>
+			 <div class="formControls col-2"><select name="collegeId" class="form-control" id="form_select_2">
+																<option value="">--选择学院--</option>
+															</select></div>
+			</div>
+            <div class="Add_p_s">
+             <label class="form-label col-2">专业：</label>
+			 <div class="formControls col-2"><select name="majorId" class="form-control" id="form_select_3">
+																<option value="">--选择专业--</option>
+
+
+															</select></div>
+			</div>
+
+
+
+		 </div>
+		<div class="clearfix cl">
+                <div class="Button_operation">
+                    <button onClick="printOrder();" class="btn btn-primary radius" type="button"><i class="icon-save "></i>下载</button>
+                </div>
+         </div>
+	</form>>
+</div>
+
+<script type="text/javascript">
+	var c = new Array();
+
+
+	// 获取校区，学院，专业信息
+	 $(document).ready(function () {
+		$.ajax({
+			 url: url+"/student/collegetree",
+			 type: "GET",
+			 dataType: "json",
+			 async:"true",
+			 xhrFields: {withCredentials: true},
+			 success:function (msg) {
+				console.log(msg.data)
+                $("#form_select_1").empty();
+          		$("#form_select_1").append("<option value=''>--选择校区--</option>");
+          		for(var i=0;i<msg.data.length;i++){
+            	$("#form_select_1").append('<option value='+ i +'>'+msg.data[i].name+'</option>');
+            	c[i] = msg.data[i];
+          		}
+
+          		$("#form_select_1").change(function () {
+					var now_form_select_1 = $(this).val();
+					console.log("学院");
+					console.log(msg.data[now_form_select_1].list);
+					 $("#form_select_2").empty();
+					 $("#form_select_2").append("<option value=''>--选择学院--</option>");
+					 for(var k=0; k<=msg.data[now_form_select_1].list.length; k++) {
+						$("#form_select_2").append('<option value="' + k + '">' + msg.data[now_form_select_1].list[k].name + '</option>');
+
+						}
+                })
+
+				 $("#form_select_2").change(function () {
+				    var now_form_select_1 = $("#form_select_1").val();
+					var now_form_select_2 = $(this).val();
+					console.log("专业");
+					console.log(msg.data[now_form_select_1].list[now_form_select_2].list);
+					console.log(msg.data[1].list[0].list,now_form_select_1,now_form_select_2);
+					 $("#form_select_3").empty();
+					 $("#form_select_3").append("<option value=''>--选择专业--</option>");
+					 for(var j=0; j <= msg.data[now_form_select_1].list[now_form_select_2].list.length; j++) {
+						$("#form_select_3").append('<option value="' + j + '">' + msg.data[now_form_select_1].list[now_form_select_2].list[j].name + '</option>');
+
+						}
+                })
+            }
+		})
+    })
+
+    //打印订单
+    function printOrder() {
+
+        var time=$("#time").val();
+        var college=$("#form_select_1").find("option:selected").text();
+        var compuseid=$("#form_select_2").find("option:selected").text();
+        var professional=$("#form_select_3").find("option:selected").text();
+
+        console.log(time,college,compuseid,professional)
+		console.log(c)
+		for(var i = 0; i<c.length; i++){
+            // console.log(c[i])
+			for(var j = 0; j<c[i].list.length;j++){
+                // console.log(c[i].list[j])
+				for(var k = 0;k<c[i].list[j].list.length;k++){
+                    // console.log(c[i].name)
+                    // console.log(c[i].list[j].list[k].name)
+                    if(c[i].name == college && c[i].list[j].name ==compuseid && professional ==c[i].list[j].list[k].name){
+                        var cid = c[i].id
+						var ccid = c[i].list[j].id
+						var pid = c[i].list[j].list[k].id
+						//console.log(c[i].name,c[i].list[j].name,c[i].list[j].list[k].name)
+                    }
+				}
+			}
+
+
+		}
+		//college学院 campus 校区
+		if(time==''&&cid=="undefined"&&ccid=="undefined"&&pid=="undefined"){
+            window.location.href=url+'/order/export';
+		// }else if(cid!="undefined"&&ccid=="undefined"&&pid=="undefined"){
+         //    window.location.href=url+'/order/export?beginDate='+ time + '&campusId=' + cid;
+		// }else if(cid!="undefined"&&ccid!="undefined"&&pid=="undefined"){
+         //    window.location.href=url+'/order/export?beginDate='+ time+ '&collegeId=' + ccid + '&campusId=' + cid;
+		// }else if(cid!="undefined"&&ccid!="undefined"&&pid!="undefined"){
+         //    window.location.href=url+'/order/export?beginDate='+ time+ '&collegeId=' + ccid + '&campusId=' + cid + '&majorId=' + pid;
+		// }
+		
+
+
+		//window.location.href=url+'/order/export?beginDate='+ time+ '&collegeId=' + ccid + '&campusId=' + cid + '&majorId=' + pid;
+		//+ '&collegeId=' + ccid + '&campusId=' + cid + '&majorId=' + pid;
+
+    }
+</script>
+</body>
+</html>

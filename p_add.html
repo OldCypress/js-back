@@ -1,0 +1,166 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+		<meta charset="utf-8">
+		<link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+		<!--[if IE 7]>
+		  <link rel="stylesheet" href="assets/css/font-awesome-ie7.min.css" />
+		<![endif]-->
+		<link rel="stylesheet" href="assets/css/ace.min.css" />
+		<link rel="stylesheet" href="assets/css/ace-rtl.min.css" />
+		<link rel="stylesheet" href="assets/css/ace-skins.min.css" />
+        <link rel="stylesheet" href="assets/css/style.css"/>
+		<!--[if lte IE 8]>
+		  <link rel="stylesheet" href="assets/css/ace-ie.min.css" />
+		<![endif]-->
+		<script src="assets/js/ace-extra.min.js"></script>
+		<!--[if lt IE 9]>
+		<script src="assets/js/html5shiv.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+		<![endif]-->
+		<script src="assets/js/jquery-1.9.1.min.js"></script>
+        <script src="assets/layer/layer.js" type="text/javascript"></script>
+	<script type="text/javascript" src="assets/js/validation.js"></script>
+	<script type="">
+        $.ajax({
+         url: url+"/admin/isLogin",
+         type: "GET",
+         dataType: "json",
+         async:false,
+         xhrFields: {withCredentials: true},
+        success:function (data) {
+             //console.log(data.code)
+            if(data.code=="-1"){
+                window.location.href="login.html"
+            }
+
+        }
+    })
+    </script>
+		<style>
+        .img-container{
+            width: 223px;
+            height: 150px;
+            background:#F2F2F2;
+            margin-bottom:35px;
+            overflow: hidden;
+            border: 1px solid #000;
+        }
+        .img-container>img{
+            width: 223px;
+            height: 150px;
+        }
+        .img{
+            width: 223px;
+            height: 150px;
+        }
+
+    </style>
+<title>添加商品图片</title>
+</head>
+<body>
+<div class="type_style">
+	<div class="type_title">添加商品图片</div>
+	<div class="type_content">
+		<form class="card-form" id="addform" method="post" enctype="multipart/form-data" onsubmit="return false">
+			<div class="form-group">
+				<label for="commodityId">商品编号：</label>
+				<input id="commodityId" name="commodityId" type="text"><br><br>
+				<label for="drivingLicence">图片预览：</label>
+				<div class="img-container"></div>
+				<input class="img-btn" type="file" id="drivingLicence" name="file">
+				<br>
+				<div class="col-sm-1"></div>
+				<button type="button" onclick="upload()" class="btn btn-primary col-sm-3">添加</button>
+
+			</div>
+		</form>
+	</div>
+
+</div>
+
+<script>
+
+//上传图片并预览
+        function previewImg(fileInput,imgDiv){
+            if(window.FileReader){//支持FileReader的时候
+                var reader=new FileReader();
+                reader.readAsDataURL(fileInput.files[0]);
+                reader.onload=function(evt){
+                    imgDiv.innerHTML="\<img src="+evt.target.result+"\>";
+                }
+            }else{//兼容ie9-
+                imgDiv.innerHTML='<div class="img" style="filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale,src=\'' + fileInput.value + '\)\';"></div>';
+            }
+        }
+        function selectImg(fileInputs,imgDivs){
+            var checkImg=new RegExp("(.jpg$)|(.png$)|(.bmp$)|(.jpeg$)","i");
+            var i=0;
+            for(;i<fileInputs.length&&i<imgDivs.length;i++){
+                (function(i){//立即执行函数；保存i
+                    fileInputs[i].onchange=function(){
+                        if(checkImg.test(fileInputs[i].value)){
+                            previewImg(this,imgDivs[i]);
+                        }else{
+                            alert("只支持上传.jpg .png .bmp .jpeg;你的选择有误");
+                        }
+                    };
+                })(i);
+            }
+
+        }
+        /* 为IE6 IE7 IE8增加document.getElementsByClassName函数 */
+        /MSIE\s*(\d+)/i.test(navigator.userAgent);
+        var isIE=parseInt(RegExp.$1?RegExp.$1:0);
+        if(isIE>0&&isIE<9){
+            document.getElementsByClassName=function(cls){
+                var els=this.getElementsByTagName('*');
+                var ell=els.length;
+                var elements=[];
+                for(var n=0;n<ell;n++){
+                    var oCls=els[n].className||'';
+                    if(oCls.indexOf(cls)<0)        continue;
+                    oCls=oCls.split(/\s+/);
+                    var oCll=oCls.length;
+                    for(var j=0;j<oCll;j++){
+                        if(cls==oCls[j]){
+                            elements.push(els[n]);
+                            break;
+                        }
+                    }
+                }
+                return elements;
+            }
+        }
+        var fileInputs=document.getElementsByClassName("img-btn");//文件选择按钮
+        var imgDivs=document.getElementsByClassName("img-container");//图片容器
+        selectImg(fileInputs,imgDivs);
+    </script>
+
+<script type="text/javascript">
+	function upload() {
+	 var formData = new FormData($("#addform")[0]);
+	$.ajax({
+    url:url+'/commodityImage/add',
+    type: 'POST',
+    cache: false,
+	processData : false,
+	contentType: false,
+	async:"true",
+	data:formData,
+	xhrFields:{withCredentials:true},
+	success:function (data) {
+		console.log("成功")
+		alert("添加成功")
+    },
+    error:function (data) {
+		console.log("失败")
+		alert("添加失败")
+    }
+	})
+    }
+
+</script>
+</body>
+</html>

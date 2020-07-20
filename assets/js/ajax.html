@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+
+
+<div class="outer">
+
+
+
+</div>
+
+<script>
+    $.ajax({
+        // url: "http://test.lzfnb.top/order/refund",
+        url: "http://test.lzfnb.top/order/export",
+        type: "POST",
+        xhrFields:{
+            withCredentials:true
+        },
+        data: {
+            // orderId:"554535085137285888",
+            // content:"公告内容测试 公告内容测试 公告内容测试 公告内容测试 公告内容测试 公告内容测试",
+        },
+        success:function (result) {
+            // alert(result["code"] + result["msg"])
+            console.log(result)
+        }
+    })
+</script>
+</body>
+</html>
